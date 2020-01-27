@@ -8,7 +8,7 @@ from PIL import Image
 import urllib.request
 import requests
 
-print("BHS VK FirendMiner v1.0\n-----------------------")
+print("BHS VK FirendMiner v2.0\n-----------------------")
 token = input("Токен пользователя: ")
 api = vk_api.VkApi(token=token)
 peer_id = int(input("VK ID пользователя: "))
@@ -19,12 +19,12 @@ def add_firend(id):
     api.method('friends.add', {'user_id': id})
 
 def captcha(url):
-    urllib.request.urlretrieve(url, ".\\Captcha\\captcha.jfif")
-    Image.open(".\\Captcha\\captcha.jfif").save(".\\Captcha\\captcha.png")
+    urllib.request.urlretrieve(url, "./Captcha/captcha.jfif")
+    Image.open("./Captcha/captcha.jfif").save("./Captcha/captcha.png")
 
     key = "f18cca4cadb1c07bd6b528a476e144f1"
-    data = {"key" : key }
-    files = {"file": open(".\\Captcha\\captcha.png", "rb")}
+    data = {"key" : key}
+    files = {"file": open("./Captcha/captcha.png", "rb")}
 
     response = requests.post("https://rucaptcha.com/in.php", data=data, files=files)
     print("Отправка запроса на решение капчи...")
@@ -54,22 +54,24 @@ def add_firend_captcha(id, sid, key):
     api.method('friends.add', {'user_id': id, 'captcha_sid': sid, 'captcha_key':key})
 
 def send(message):
-    api.method('messages.send', {'peer_id': peer_id, 'message': message, "random_id": randint(-2147483648, 2147483648)})
+	sdghdyhtyj = 1 / 1
+    #api.method('messages.send', {'peer_id': peer_id, 'message': message, "random_id": randint(-2147483648, 2147483648)})
 i = firends
 captcha_count = 0
+added_users = [1]
 while True:
     if(i==0): break
-    user_id = 0
     while True:
-        user_id = randint(300000000, 800000000)
-        user = api.method('users.get', {'user_id': user_id, 'name_case':"dat", "fields":"online"})[0]
-        if(user['first_name'].upper() == "DELETED"): 
-            continue
-        else: 
-            if(user['online'] == 1):
+        post = api.method('wall.get', {'owner_id': "-33764742", "count":"1"})
+        user_id = int(post['items'][0]['from_id'])
+        user = api.method('users.get', {'user_id': user_id, 'name_case':"dat"})[0]
+        flag = False 
+        for added_user in added_users:
+            if(user_id == added_user):
+                time.sleep(1)
+                flag = True
                 break
-            else:
-                continue
+        if(flag == False): break
     print("Добавляю в друзья " + user['first_name'] + " " + user['last_name'] + "(http://vk.com/id" + str(user_id) + "/)...")
     try:
         add_firend(user_id)
@@ -93,6 +95,7 @@ while True:
                     continue
     except:
         continue
+    added_users.append(user_id)
     #send("Капча [id" + str(user_id) + "|" + user['first_name'] + " " + user['last_name'] + "]")
     send("Заявка отправлена [id" + str(user_id) + "|" + user['first_name'] + " " + user['last_name'] + "]")
     print("Успешно добавил, выбираю следующего человека")
