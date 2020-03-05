@@ -22,7 +22,7 @@ def captcha(url):
     urllib.request.urlretrieve(url, "./Captcha/captcha.jfif")
     Image.open("./Captcha/captcha.jfif").save("./Captcha/captcha.png")
 
-    key = "f18cca4cadb1c07bd6b528a476e144f1"
+    key = ""
     data = {"key" : key}
     files = {"file": open("./Captcha/captcha.png", "rb")}
 
