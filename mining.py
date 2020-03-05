@@ -7,8 +7,9 @@ import os
 from PIL import Image
 import urllib.request
 import requests
+import re
 
-print("BHS VK FirendMiner v2.0\n-----------------------")
+print("BHS VK FirendMiner v2.0 SE\n--------------------------")
 token = input("Токен пользователя: ")
 api = vk_api.VkApi(token=token)
 peer_id = int(input("VK ID пользователя: "))
@@ -62,44 +63,57 @@ added_users = [1]
 while True:
     if(i==0): break
     while True:
-        post = api.method('wall.get', {'owner_id': "-33764742", "count":"1"})
-        user_id = int(post['items'][0]['from_id'])
-        user = api.method('users.get', {'user_id': user_id, 'name_case':"dat"})[0]
-        flag = False 
-        for added_user in added_users:
-            if(user_id == added_user):
-                time.sleep(1)
-                flag = True
-                break
-        if(flag == False): break
-    print("Добавляю в друзья " + user['first_name'] + " " + user['last_name'] + "(http://vk.com/id" + str(user_id) + "/)...")
-    try:
-        add_firend(user_id)
-    except vk_api.Captcha as e:
-        print("ВКонтакте просит капчу, начинаю решать...")
-        send("ВКонтакте просит капчу, начинаю решать...")
-        while True:
-            captcha_count += 1
-            captcha_compl = captcha(e.url)
-            if(captcha_compl == -1):
-                print("Отмена в связи с ошибкой капчи!")
-                break
-            else:
-                try:
-                    add_firend_captcha(user_id, e.sid, captcha_compl)
+        print("Получаю список...")
+        post = api.method('wall.get', {'owner_id': "-25885216", "count":"1", 'filter':'others'})
+        user_list = re.findall("[@][i][d]\\d+", post['items'][0]['text'])
+        print("Получил список в {count} чел.".format(count = str(len(user_list))))
+        if(len(user_list) > 0):
+            print("Получил список в {count} чел.".format(count = str(len(user_list))))
+            for user_id in user_list:
+                if(i==0): 
+                    print("Достигнут лимит накрутки")
                     break
-                except vk_api.Captcha as err:
-                    print("НЕПРАВИЛЬНАЯ КАПЧА!!!")
-                    send("НЕПРАВИЛЬНАЯ КАПЧА!!!")
-                    e = err
+                user_id = int(user_id.split('@id')[1])
+                for added_user in added_users:
+                    if(user_id == added_user):
+                        continue
+                print("Добавляю в друзья (http://vk.com/id" + str(user_id) + "/)...")
+                try:
+                    add_firend(user_id)
+                except vk_api.Captcha as e:
+                    try:
+                        print("ВКонтакте просит капчу, начинаю решать...")
+                        send("ВКонтакте просит капчу, начинаю решать...")
+                        while True:
+                            captcha_count += 1
+                            captcha_compl = captcha(e.url)
+                            if(captcha_compl == -1):
+                                print("Отмена в связи с ошибкой капчи!")
+                                break
+                            else:
+                                try:
+                                    add_firend_captcha(user_id, e.sid, captcha_compl)
+                                    break
+                                except vk_api.Captcha as err:
+                                    print("НЕПРАВИЛЬНАЯ КАПЧА!!!")
+                                    send("НЕПРАВИЛЬНАЯ КАПЧА!!!")
+                                    e = err
+                                    continue
+                    except:
+                        print("Не получилось =(")
+                        continue
+                except:
+                    print("Не получилось =(")
                     continue
-    except:
-        continue
-    added_users.append(user_id)
-    #send("Капча [id" + str(user_id) + "|" + user['first_name'] + " " + user['last_name'] + "]")
-    send("Заявка отправлена [id" + str(user_id) + "|" + user['first_name'] + " " + user['last_name'] + "]")
-    print("Успешно добавил, выбираю следующего человека")
-    i-=1
+                added_users.append(user_id)
+                #send("Капча [id" + str(user_id) + "|" + user['first_name'] + " " + user['last_name'] + "]")
+                send("Заявка отправлена @id" + str(user_id))
+                print("Успешно добавил, выбираю следующего человека")
+                i-=1
+            if(i==0): break
+        else:
+            print("Получил пустой список, получаю еще")
+            continue
 print("Успешно отправлены заявки " + str(firends - i) + " людям.\nРешено капч: " + str(captcha_count) + " шт.\nПримерно потрачено на капчу: " + str((captcha_count * (44 / 1000))) + " руб.")
 send("Успешно отправлены заявки " + str(firends - i) + " людям.\nРешено капч: " + str(captcha_count) + " шт.\nПримерно потрачено на капчу: " + str((captcha_count * (44 / 1000))) + " руб.")
 input()
